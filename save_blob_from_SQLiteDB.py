@@ -8,13 +8,15 @@ from argparse import ArgumentParser
 import re
 import progressbar2
 
-
+__author__    = "Dennis Schreiber"
+__version__   = "20231126"
+__date__      = "26.11.2023"
+__copyright__ = "Copyright (c) Dennis Schreiber [4n6linux@gmail.com]"
+__license__   = "GNU LGPL version 3"
 
 p = ArgumentParser()
-#p.add_argument('-b', '--body', help='Return USN records in comma-separated format', action='store_true')
 p.add_argument('-d', '--database', help='auszulesende SQLite-Datenbank', required=True)
 p.add_argument('-t', '--table', help='Tabelle mit den binären Daten', required=True)
-#p.add_argument('-i', '--zid', help='Feld mit eindeutiger ID für den Datensatz', required=True)
 p.add_argument('-b', '--blob', help='Spalte mit den binären Daten', required=True)
 p.add_argument('-1', '--dateiname', help='Spalte mit dem Dateinamen', required=True)
 p.add_argument('-2', '--dateiname2', help='Spalte mit einem weiteren Bestandteil für den Dateinamen', required=False)
