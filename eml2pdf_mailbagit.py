@@ -12,6 +12,7 @@ import sys
 from argparse import ArgumentParser
 import locale
 from sys import argv, stderr, exit
+import img2pdf
 
 __version__ = '20240118'
 __author__ = 'Dennis Schreiber'
@@ -41,6 +42,10 @@ SUCHPFAD=args.indir
 # gesuchte Dateiendung für alle einfach '' setzen
 ENDUNG='pdf'
 
+# specify paper size (A4) for img2pdf
+a4inpt = (img2pdf.mm_to_pt(210),img2pdf.mm_to_pt(297))
+layout_fun = img2pdf.get_layout_fun(a4inpt)
+
 PDFdir = os.path.join(SUCHPFAD, 'data' ,'pdf')
 ATTACHdir = os.path.join(SUCHPFAD, 'data' ,'attachments')
 alleDateien=DATEIEN(PDFdir, ENDUNG)
@@ -59,19 +64,22 @@ for DATEI in DATEIEN(PDFdir, ENDUNG):
             filename = os.path.basename(a)
             # Anhänge hinzufügen, aber nicht die attachments.csv
             if filename.lower() != 'attachments.csv':
-                print(f'\tFüge Anhang {filename} hinzu.')
-                if mime[0].split('/')[1].lower() == ' pdf':
-                    try:
+                print(f'\tFüge Anhang "{filename}" hinzu.')
+                try:
+                    if mime[0].split('/')[1].lower() == ' pdf':
                         # PDF-Anhang anhängen
                         merger.append(a)
                         # PDF-Anhang einbetten
                         merger.add_attachment(filename, a)
-                    except Exception as err:
-                        print(f'Fehler beim Bearbeiten des Anhangs {filename}: {str(err)}')
-                        continue
-                else:
-                    # nicht PDF-Datei konvertieren
-                    try:
+                    elif mime[0].split('/')[0].lower() == 'image':
+                        #image = Image.open(a)
+                        PDFIMAGE = img2pdf.convert(a, layout_fun=layout_fun)
+                        with tempfile.TemporaryFile() as fp:
+                                fp.write(PDFIMAGE)
+                                merger.append(fp, 'rb')
+                        merger.add_attachment(filename, a)
+                    else:
+                        # nicht PDF-Datei konvertieren
                         files = {
                             'fileInput': (filename,
                                         open(a, 'rb'),
@@ -86,9 +94,9 @@ for DATEI in DATEIEN(PDFdir, ENDUNG):
                             # Orignaldatei einbetten
                             merger.add_attachment(filename, r.content)
                             # Anlage wieder löschen
-                    except Exception as err:
-                        print(f'Fehler beim Bearbeiten des Anhangs {filename}: {str(err)}')
-                        continue
+                except Exception as err:
+                    print(f'Fehler beim Bearbeiten des Anhangs {filename}: {str(err)}')
+                    continue
 
         # Write to an output PDF document
         output = open(DATEI, "wb")
