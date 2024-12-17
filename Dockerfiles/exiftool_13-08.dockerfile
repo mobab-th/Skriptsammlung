@@ -19,4 +19,5 @@ RUN apt-get update && apt-get install -y wget libarchive-tools nano \
     && cd /opt/ \
     && wget -qO- {GeoLocation} | bsdtar -xvf-
 
+WORKDIR /data
 ENTRYPOINT ["exiftool"]
